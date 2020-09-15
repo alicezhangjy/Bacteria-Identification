@@ -133,7 +133,7 @@ def int_training(my_sample, my_test, threshold = 0.04):
     return model_para,model_record
 
 
-def gene_to_model(my_gene):
+def gene_to_model(my_gene): #return gene weight info necessary for identification
     '''
         :param my_gene: pd of 10 most information gene mapped to mean weight
         :return: (1) my_table: matrix of 10 genes and respective weights for each (genus, species) pair
@@ -142,10 +142,10 @@ def gene_to_model(my_gene):
                  (4) my_gene: input to the function LOL
     '''
     my_gene = my_gene[:10]  # Getting 10 most insightful genes only
-    my_comparison = training_comparison_table(my_gene)
-    my_gene_set = list(my_gene.index)
+    my_comparison = training_comparison_table(my_gene) #modal gene weights of 10 most informative genes mapped to each genus,species pair
+    my_gene_set = list(my_gene.index) #names of 10 most informative genes
 
-    my_table = my_comparison[my_gene_set].fillna(0.0)
+    my_table = my_comparison[my_gene_set].fillna(0.0) #fill NaN with 0.0
     my_answer_table = my_comparison[['genus', 'species']]
     model_data = (my_table, my_answer_table, my_gene_set, my_gene)
     return model_data

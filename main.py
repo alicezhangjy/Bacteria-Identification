@@ -18,8 +18,9 @@ hupb,0.327136496"""
 # sample_path = "data/sample.txt"
 sample_path= "data/Escherichia coli DH5 Alpha.txt" #sample we want to analyse
 
-sample = IdentifySpectra(sample_path)
+
 
 my_gene = pd.read_csv("weight.csv", index_col=0)["mean"]
-model_data = training.gene_to_model(my_gene)
+model_data = training.gene_to_model(my_gene) 
+sample = IdentifySpectra(sample_path)
 sample.answer(model_data, the_threshold)
