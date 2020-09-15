@@ -16,7 +16,7 @@ hupb,0.327136496"""
 
 
 # sample_path = "data/sample.txt"
-sample_path= "data/Vibrio mimicus ATCC 33653.txt" #sample we want to analyse
+sample_path= "data/Escherichia coli DH5 Alpha.txt" #sample we want to analyse
 
 sample = IdentifySpectra(sample_path)
 
