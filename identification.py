@@ -21,7 +21,7 @@ import pprint
 # with open('uniprot_text.txt') as f:
 #     uniprot = tuple([i.strip() for i in f])
 
-the_threshold = 0.12
+the_threshold = 0.12  #used to filter intensities
 score_threshold = 0.88
 tolerance = 1000
 thr = 0.05
@@ -133,8 +133,8 @@ class IdentifySpectra(BacteriaSpectra):
             :param x: input gene weight
             :return: (float) measure of "closeness" to theoretical weight (???)
             """
-            y = abs(pattern['mz'] - x)
-            y = y[y < x * tolerance * 1e-6]
+            y = abs(pattern['mz'] - x) # y = subtract x from each value in the list pattern
+            y = y[y < x * tolerance * 1e-6] #only keep values that are less than the tolerance
             if len(y) == 0:
                 return 0.0
 
@@ -148,40 +148,40 @@ class IdentifySpectra(BacteriaSpectra):
             :param my_gene_set: list of 10 most informative genes
             :return: List of unique gene weights for all (genus, species, gene) triplets
             """
-            my_table = my_table.fillna(0)
+            my_table = my_table.fillna(0) #pandas dataframe. replace all NaN's with 0.0
             b = set({})
-            for i in my_gene_set:
-                b = b | set(my_table[i].unique())  # union of set
+            for i in my_gene_set: #for each gene
+                b = b | set(my_table[i].unique())  # union of set. unique gene weights of each gene
             return list(b)
 
         b = making_faster(com_table, gn_set)   # a list of unique gene weights, apparently (???)
 
-        c = [match_soy_peak(x) for x in b]
+        c = [match_soy_peak(x) for x in b] # c is post-processed unique gene weights, if the gene weights hit threshold
 
-        my_mw_dict = dict(zip(b, c))
+        my_mw_dict = dict(zip(b, c)) #grouping each soypeak(value) to its unique gene weight(key) as a dictionary. eg. "30483": "0.0"
 
-        table = com_table.applymap(lambda x: my_mw_dict[x])
+        table = com_table.applymap(lambda x: my_mw_dict[x]) #for each gene, put the soypeak(value) to its corresponding genus,species pair. 
 
-        id_value = (table.dot(gn_value)).sort_values()  # list of "similarity" measure to gene index
+        id_value = (table.dot(gn_value)).sort_values()  # list of "similarity" measure to gene index. Does dot product between table (1276 x 10) of each genus,species's gene weights on actual avg gene weight (10 x 1 ) to get a list of "matching" intensities for each genus,value pair (1276 x 1)
         id_panel = id_value[-4:]  # getting the last 4 (genes with highest similarity measures)
 
-        score_mode = id_panel.mode()
+        score_mode = id_panel.mode() #get the value that appears most often
         if not score_mode.empty :
-            score = score_mode.iloc[-1]
+            score = score_mode.iloc[-1] #get the last value
         else:
             score = id_panel.max()
 
         if score < score_threshold:
             return 'none'
 
-        candidates = id_panel[id_panel == score].index[0]
-        species_index = id_panel[id_panel == score].index
-        species_candidates = tuple(answer_table.iloc[species_index]['species'])
-        answer_candidate = answer_table.iloc[candidates]['genus']
-        print("answer candidate:", answer_candidate)
+        candidates = id_panel[id_panel == score].index[0] #
+        species_index = id_panel[id_panel == score].index #returns the indices that contains the score
+        species_candidates = tuple(answer_table.iloc[species_index]['species']) #returns the species that match the score
+        answer_candidate = answer_table.iloc[candidates]['genus'] #returns the genus that matches the score
+        print("answer candidate:", answer_candidate) #
         t2 = time.time()
 
-        answer_dict = {'score': score, 'time': round(t2-t1, 2),
+        answer_dict = {'score (the most commonly appeared dot product)': score, 'time taken': round(t2-t1, 2),
                        "genera": answer_candidate, "species" : species_candidates,
                        "path": self.pattern}
 
